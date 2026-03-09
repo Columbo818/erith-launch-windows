@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erith Launch Windows</title>
+    <style>
+        :root {
+            --navy: #1b2a4a;
+            --dark-blue: #234170;
+            --mid-blue: #3a6ea5;
+            --light-blue: #c6ddf0;
+            --pale-blue: #eaf2fa;
+            --sand: #f5f0e8;
+            --white: #ffffff;
+            --text: #1a1a2e;
+            --text-muted: #5a6474;
+            --red: #c0392b;
+            --green: #1e8449;
+            --border: #d0d8e4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--pale-blue);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--navy), var(--dark-blue));
+            color: var(--white);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        header p.subtitle {
+            font-size: 0.9rem;
+            color: var(--light-blue);
+            font-weight: 400;
+        }
+
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+
+        .info-box {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--mid-blue);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .info-box strong {
+            color: var(--text);
+        }
+
+        .controls {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 1rem;
+            color: var(--text);
+            background: var(--pale-blue);
+            transition: border-color 0.2s;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--mid-blue);
+            box-shadow: 0 0 0 2px rgba(58, 110, 165, 0.2);
+        }
+
+        .controls button {
+            padding: 0.55rem 1.5rem;
+            background: var(--mid-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            height: fit-content;
+        }
+
+        .controls button:hover {
+            background: var(--dark-blue);
+        }
+
+        .controls button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* States */
+        .state-message {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .state-message.error {
+            color: var(--red);
+            border-color: var(--red);
+            background: #fdf2f2;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--light-blue);
+            border-top-color: var(--mid-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 0.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+            white-space: nowrap;
+        }
+
+        thead {
+            background: var(--navy);
+            color: var(--white);
+        }
+
+        thead th {
+            padding: 0.7rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--pale-blue);
+        }
+
+        tbody td {
+            padding: 0.6rem 0.75rem;
+        }
+
+        td.height {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        td.cutoff {
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--navy);
+            color: var(--light-blue);
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.78rem;
+            margin-top: auto;
+        }
+
+        footer .attribution {
+            opacity: 0.85;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .field {
+                min-width: 100%;
+            }
+
+            .controls button {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.82rem;
+            }
+
+            thead th, tbody td {
+                padding: 0.5rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Erith Launch Windows</h1>
+    <p class="subtitle">Erith Yacht Club &mdash; River Thames</p>
+</header>
+
+<main>
+    <div class="info-box">
+        <p>
+            <strong>When can you launch?</strong>
+            This tool calculates upcoming launch windows based on tidal predictions for Erith.
+            It uses the <strong>Rule of Twelfths</strong> to estimate when the rising tide
+            will reach a height sufficient to float your boat off the trailer on the slipway.
+            Windows are filtered to daylight hours only.
+        </p>
+    </div>
+
+    <div class="controls">
+        <div class="field">
+            <label for="trailer">Trailer Height (m)</label>
+            <input type="number" id="trailer" value="0.5" min="0" step="0.01">
+        </div>
+        <div class="field">
+            <label for="draft">Yacht Draft (m)</label>
+            <input type="number" id="draft" value="1.14" min="0" step="0.01">
+        </div>
+        <button id="btn-calculate" onclick="fetchWindows()">Calculate</button>
+    </div>
+
+    <div id="results"></div>
+</main>
+
+<footer>
+    <p class="attribution">Contains ADMIRALTY&reg; tidal data: &copy; Crown Copyright and database right</p>
+</footer>
+
+<script>
+    const LAMBDA_URL = "https://thteoi3sotqiex6w4jlebidyvy0ihvqy.lambda-url.eu-west-2.on.aws/";
+    const SUNSET_BUFFER_HOURS = 1;
+
+    const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function getDayOfWeek(dateStr) {
+        // Use UTC noon to avoid timezone edge cases
+        const d = new Date(dateStr + "T12:00:00Z");
+        return DAY_NAMES[d.getUTCDay()];
+    }
+
+    function subtractHour(timeStr, hours) {
+        // timeStr is "HH:MM", returns "HH:MM" minus given hours
+        const parts = timeStr.split(":");
+        let totalMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        totalMinutes -= hours * 60;
+        if (totalMinutes < 0) totalMinutes += 24 * 60;
+        const h = Math.floor(totalMinutes / 60) % 24;
+        const m = totalMinutes % 60;
+        return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+    }
+
+    function formatDate(dateStr) {
+        // "2026-03-10" -> "10 Mar"
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const parts = dateStr.split("-");
+        const day = parseInt(parts[2], 10);
+        const month = months[parseInt(parts[1], 10) - 1];
+        return day + " " + month;
+    }
+
+    function showLoading() {
+        document.getElementById("results").innerHTML =
+            '<div class="state-message">' +
+            '<div class="spinner"></div>' +
+            '<div>Fetching launch windows&hellip;</div>' +
+            '</div>';
+    }
+
+    function showError(message) {
+        document.getElementById("results").innerHTML =
+            '<div class="state-message error">' +
+            'Error: ' + escapeHtml(message) +
+            '</div>';
+    }
+
+    function showEmpty() {
+        document.getElementById("results").innerHTML =
+            '<div class="state-message">' +
+            'No launch windows found for the next 7 days with these parameters.' +
+            '</div>';
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderTable(data) {
+        if (!data || data.length === 0) {
+            showEmpty();
+            return;
+        }
+
+        let html = '<div class="table-wrap"><table>' +
+            '<thead><tr>' +
+            '<th>Date</th>' +
+            '<th>Day</th>' +
+            '<th>Low</th>' +
+            '<th>Floats</th>' +
+            '<th>High</th>' +
+            '<th>Height</th>' +
+            '<th>Sunset</th>' +
+            '<th>Cutoff</th>' +
+            '</tr></thead><tbody>';
+
+        for (const w of data) {
+            const cutoff = subtractHour(w.sunset_time, SUNSET_BUFFER_HOURS);
+            html += '<tr>' +
+                '<td>' + escapeHtml(formatDate(w.date)) + '</td>' +
+                '<td>' + escapeHtml(getDayOfWeek(w.date)) + '</td>' +
+                '<td>' + escapeHtml(w.low_tide_time) + '</td>' +
+                '<td>' + escapeHtml(w.boat_floats_time) + '</td>' +
+                '<td>' + escapeHtml(w.high_tide_time) + '</td>' +
+                '<td class="height">' + escapeHtml(String(w.high_tide_height_m)) + ' m</td>' +
+                '<td>' + escapeHtml(w.sunset_time) + '</td>' +
+                '<td class="cutoff">' + escapeHtml(cutoff) + '</td>' +
+                '</tr>';
+        }
+
+        html += '</tbody></table></div>';
+        document.getElementById("results").innerHTML = html;
+    }
+
+    async function fetchWindows() {
+        const trailer = parseFloat(document.getElementById("trailer").value);
+        const draft = parseFloat(document.getElementById("draft").value);
+
+        if (isNaN(trailer) || trailer < 0 || trailer > 10) {
+            showError("Trailer height must be between 0 and 10 metres.");
+            return;
+        }
+        if (isNaN(draft) || draft < 0 || draft > 10) {
+            showError("Yacht draft must be between 0 and 10 metres.");
+            return;
+        }
+
+        const btn = document.getElementById("btn-calculate");
+        btn.disabled = true;
+        showLoading();
+
+        try {
+            const resp = await fetch(
+                LAMBDA_URL + "?trailer_height=" + encodeURIComponent(trailer) +
+                "&yacht_draft=" + encodeURIComponent(draft)
+            );
+
+            if (!resp.ok) {
+                let msg = "Request failed (HTTP " + resp.status + ")";
+                try {
+                    const errData = await resp.json();
+                    if (errData.error) msg = errData.error;
+                } catch (_) {}
+                showError(msg);
+                return;
+            }
+
+            const data = await resp.json();
+
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            renderTable(data);
+        } catch (err) {
+            showError("Could not connect to the server. Please try again later.");
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Auto-fetch on page load with defaults
+    document.addEventListener("DOMContentLoaded", fetchWindows);
+</script>
+
+</body>
+</html>
