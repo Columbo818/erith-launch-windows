@@ -297,11 +297,11 @@
     <div class="controls">
         <div class="field">
             <label for="trailer">Trailer Height (m)</label>
-            <input type="number" id="trailer" value="0.5" min="0" step="0.01">
+            <input type="number" id="trailer" placeholder="e.g. 0.5" min="0" step="0.01">
         </div>
         <div class="field">
             <label for="draft">Yacht Draft (m)</label>
-            <input type="number" id="draft" value="1.14" min="0" step="0.01">
+            <input type="number" id="draft" placeholder="e.g. 1.14" min="0" step="0.01">
         </div>
         <button id="btn-calculate" onclick="fetchWindows()">Calculate</button>
     </div>
@@ -414,11 +414,11 @@
         const draft = parseFloat(document.getElementById("draft").value);
 
         if (isNaN(trailer) || trailer < 0 || trailer > 10) {
-            showError("Trailer height must be between 0 and 10 metres.");
+            showError("Please enter a trailer height (0\u201310 metres).");
             return;
         }
         if (isNaN(draft) || draft < 0 || draft > 10) {
-            showError("Yacht draft must be between 0 and 10 metres.");
+            showError("Please enter a yacht draft (0\u201310 metres).");
             return;
         }
 
@@ -457,8 +457,7 @@
         }
     }
 
-    // Auto-fetch on page load with defaults
-    document.addEventListener("DOMContentLoaded", fetchWindows);
+    // No auto-fetch — user must press Calculate
 </script>
 
 </body>
