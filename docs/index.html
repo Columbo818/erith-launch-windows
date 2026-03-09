@@ -234,6 +234,59 @@
             color: var(--text-muted);
         }
 
+        /* Calendar */
+        .cal-row-link {
+            text-decoration: none;
+            font-size: 1.1rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .cal-row-link:hover {
+            opacity: 1;
+        }
+
+        /* Calendar buttons */
+        .calendar-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .cal-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cal-btn-google {
+            background: var(--mid-blue);
+            color: var(--white);
+        }
+
+        .cal-btn-google:hover {
+            background: var(--dark-blue);
+        }
+
+        .cal-btn-ics {
+            background: var(--white);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .cal-btn-ics:hover {
+            background: var(--pale-blue);
+        }
+
         /* Footer */
         footer {
             background: var(--navy);
@@ -373,11 +426,75 @@
         return div.innerHTML;
     }
 
+    // --- Calendar helpers ---
+
+    let lastResults = [];
+
+    function toGoogleDate(dateStr, timeStr) {
+        // "2026-03-10", "13:45" -> "20260310T134500"
+        return dateStr.replace(/-/g, "") + "T" + timeStr.replace(":", "") + "00";
+    }
+
+    function buildGoogleUrl(w) {
+        const title = "Launch Window \u2013 Floats " + w.boat_floats_time;
+        const details = "Boat floats: " + w.boat_floats_time +
+            "\\nHigh tide: " + w.high_tide_time + " (" + w.high_tide_height_m + "m)" +
+            "\\nSunset: " + w.sunset_time;
+        const start = toGoogleDate(w.date, w.boat_floats_time);
+        const end = toGoogleDate(w.date, w.high_tide_time);
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+            "&text=" + encodeURIComponent(title) +
+            "&dates=" + start + "/" + end +
+            "&details=" + encodeURIComponent(details) +
+            "&ctz=Europe/London";
+    }
+
+    function buildIcal(windows) {
+        let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Erith Launch Windows//EN\r\n";
+        for (const w of windows) {
+            const start = toGoogleDate(w.date, w.boat_floats_time);
+            const end = toGoogleDate(w.date, w.high_tide_time);
+            const uid = w.date + "-" + w.boat_floats_time.replace(":", "") + "@erith-launch";
+            ics += "BEGIN:VEVENT\r\n" +
+                "DTSTART;TZID=Europe/London:" + start + "\r\n" +
+                "DTEND;TZID=Europe/London:" + end + "\r\n" +
+                "SUMMARY:Launch Window \u2013 Floats " + w.boat_floats_time + "\r\n" +
+                "DESCRIPTION:Boat floats: " + w.boat_floats_time +
+                    "\\nHigh tide: " + w.high_tide_time + " (" + w.high_tide_height_m + "m)" +
+                    "\\nSunset: " + w.sunset_time + "\r\n" +
+                "UID:" + uid + "\r\n" +
+                "END:VEVENT\r\n";
+        }
+        ics += "END:VCALENDAR\r\n";
+        return ics;
+    }
+
+    function downloadIcs() {
+        if (!lastResults.length) return;
+        const ics = buildIcal(lastResults);
+        const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "launch_windows.ics";
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function addToGoogle(index) {
+        if (index < 0 || index >= lastResults.length) return;
+        window.open(buildGoogleUrl(lastResults[index]), "_blank");
+    }
+
+    // --- Rendering ---
+
     function renderTable(data) {
         if (!data || data.length === 0) {
             showEmpty();
+            lastResults = [];
             return;
         }
+
+        lastResults = data;
 
         let html = '<div class="table-wrap"><table>' +
             '<thead><tr>' +
@@ -388,11 +505,11 @@
             '<th>High</th>' +
             '<th>Height</th>' +
             '<th>Sunset</th>' +
-            '<th>Cutoff</th>' +
+            '<th></th>' +
             '</tr></thead><tbody>';
 
-        for (const w of data) {
-            const cutoff = subtractHour(w.sunset_time, SUNSET_BUFFER_HOURS);
+        for (let idx = 0; idx < data.length; idx++) {
+            const w = data[idx];
             html += '<tr>' +
                 '<td>' + escapeHtml(formatDate(w.date)) + '</td>' +
                 '<td>' + escapeHtml(getDayOfWeek(w.date)) + '</td>' +
@@ -401,11 +518,17 @@
                 '<td>' + escapeHtml(w.high_tide_time) + '</td>' +
                 '<td class="height">' + escapeHtml(String(w.high_tide_height_m)) + ' m</td>' +
                 '<td>' + escapeHtml(w.sunset_time) + '</td>' +
-                '<td class="cutoff">' + escapeHtml(cutoff) + '</td>' +
+                '<td><a href="' + escapeHtml(buildGoogleUrl(w)) + '" target="_blank" class="cal-row-link" title="Add to Google Calendar">\ud83d\udcc5</a></td>' +
                 '</tr>';
         }
 
         html += '</tbody></table></div>';
+
+        html += '<div class="calendar-bar">' +
+            '<button class="cal-btn cal-btn-ics" onclick="downloadIcs()">' +
+            '\u2b07 Download all as .ics file</button>' +
+            '</div>';
+
         document.getElementById("results").innerHTML = html;
     }
 
